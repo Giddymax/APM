@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>APM Mortuary Management System</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{--navy:#1a237e;--navy-dark:#0d1457;--red:#b71c1c;--silver:#cfd8dc;--bg:#f0f2f5;--sidebar-w:240px;--card-shadow:0 2px 12px rgba(26,35,126,0.10);--radius:10px;--font-head:'Oswald',sans-serif;--font-body:'Source Sans 3',sans-serif;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-body);background:var(--bg);color:#222;min-height:100vh;display:flex}
+#sidebar{width:var(--sidebar-w);background:var(--navy-dark);min-height:100vh;display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;box-shadow:3px 0 18px rgba(0,0,0,0.18)}
+.sidebar-logo{padding:18px 14px 10px;display:flex;flex-direction:column;align-items:center;border-bottom:1px solid rgba(255,255,255,0.08);background:var(--navy)}
+.sidebar-logo img{width:72px;margin-bottom:4px;border-radius:50%}
+.sidebar-logo .co-name{color:#fff;font-family:var(--font-head);font-size:13px;text-align:center;letter-spacing:1px;line-height:1.3}
+.sidebar-logo .tagline{color:var(--silver);font-size:10px;font-style:italic;margin-top:2px}
+nav{flex:1;padding:10px 0;overflow-y:auto}
+.nav-item{display:flex;align-items:center;gap:12px;padding:12px 20px;color:rgba(255,255,255,0.72);cursor:pointer;font-family:var(--font-head);font-size:14px;letter-spacing:0.5px;transition:background .15s,color .15s;border-left:3px solid transparent}
+.nav-item:hover{background:rgba(255,255,255,0.07);color:#fff}
+.nav-item.active{background:rgba(255,255,255,0.12);color:#fff;border-left-color:#ef5350}
+.nav-item svg{flex-shrink:0;opacity:.75}
+.nav-item.active svg{opacity:1}
+.nav-section-label{color:rgba(255,255,255,0.3);font-size:9px;letter-spacing:2px;padding:14px 20px 4px;text-transform:uppercase;font-family:var(--font-head)}
+#main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{background:#fff;padding:0 28px;height:58px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 1px 6px rgba(26,35,126,0.08);position:sticky;top:0;z-index:90}
+.topbar-title{font-family:var(--font-head);font-size:20px;color:var(--navy-dark);letter-spacing:.5px}
+.topbar-right{display:flex;align-items:center;gap:14px}
+.user-badge{background:var(--navy);color:#fff;border-radius:20px;padding:5px 14px;font-size:13px;font-family:var(--font-head);letter-spacing:.5px}
+.role-badge{background:var(--red);color:#fff;border-radius:6px;padding:2px 8px;font-size:11px;font-family:var(--font-head);letter-spacing:1px}
+.page{display:none;padding:28px;flex:1}
+.page.active{display:block}
+.cards-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:16px;margin-bottom:22px}
+.card{background:#fff;border-radius:var(--radius);padding:18px 20px;box-shadow:var(--card-shadow);border-top:3px solid var(--navy);display:flex;flex-direction:column;gap:6px}
+.card.red{border-top-color:var(--red)}.card.green{border-top-color:#2e7d32}.card.silver{border-top-color:#546e7a}
+.card-label{font-size:11px;font-family:var(--font-head);color:#666;letter-spacing:1px;text-transform:uppercase}
+.card-value{font-size:26px;font-family:var(--font-head);color:var(--navy-dark);font-weight:700}
+.card.red .card-value{color:var(--red)}.card.green .card-value{color:#2e7d32}
+.section-head{font-family:var(--font-head);font-size:16px;color:var(--navy-dark);margin-bottom:14px;letter-spacing:.5px;display:flex;align-items:center;gap:8px}
+.section-head::after{content:'';flex:1;height:1px;background:rgba(26,35,126,0.12)}
+.chart-box{background:#fff;border-radius:var(--radius);padding:20px;box-shadow:var(--card-shadow);margin-bottom:22px}
+.chart-box canvas{max-height:260px}
+.table-wrap{background:#fff;border-radius:var(--radius);box-shadow:var(--card-shadow);overflow:hidden;margin-bottom:22px}
+.table-toolbar{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid #e8eaf0;gap:10px;flex-wrap:wrap}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{background:var(--navy);color:#fff;font-family:var(--font-head);font-size:12px;letter-spacing:.5px;padding:10px 12px;text-align:left;white-space:nowrap}
+tbody tr{border-bottom:1px solid #f0f0f5;transition:background .1s}
+tbody tr:hover{background:#f5f7ff}
+td{padding:9px 12px;color:#333;vertical-align:middle}
+.badge{display:inline-block;padding:2px 10px;border-radius:12px;font-size:11px;font-family:var(--font-head);letter-spacing:.5px}
+.badge-normal{background:#e3f2fd;color:#1565c0}.badge-vip{background:#fce4ec;color:#c62828}
+.badge-admin{background:#f3e5f5;color:#6a1b9a}.badge-staff{background:#e8f5e9;color:#2e7d32}
+.filter-bar{background:#fff;border-radius:var(--radius);padding:12px 18px;box-shadow:var(--card-shadow);margin-bottom:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.filter-bar label{font-family:var(--font-head);font-size:12px;color:#555;letter-spacing:.5px;white-space:nowrap}
+.filter-bar input,.filter-bar select{border:1.5px solid #dde;border-radius:7px;padding:6px 10px;font-size:13px;font-family:var(--font-body)}
+.filter-bar input:focus,.filter-bar select:focus{border-color:var(--navy);outline:none}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:7px;border:none;cursor:pointer;font-family:var(--font-head);font-size:13px;letter-spacing:.5px;transition:filter .15s,transform .1s}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--navy);color:#fff}.btn-primary:hover{filter:brightness(1.15)}
+.btn-red{background:var(--red);color:#fff}.btn-red:hover{filter:brightness(1.1)}
+.btn-green{background:#2e7d32;color:#fff}
+.btn-sm{padding:5px 11px;font-size:12px}
+.btn-print{background:#546e7a;color:#fff}
+.btn-outline{background:transparent;border:1.5px solid var(--navy);color:var(--navy)}
+.btn-outline:hover{background:var(--navy);color:#fff}
+.form-card{background:#fff;border-radius:var(--radius);box-shadow:var(--card-shadow);padding:24px;margin-bottom:22px}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px 20px}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group label{font-size:11px;font-family:var(--font-head);color:#555;letter-spacing:.5px;text-transform:uppercase}
+.form-group input,.form-group select{border:1.5px solid #dde;border-radius:7px;padding:8px 12px;font-size:13px;font-family:var(--font-body);transition:border .15s;background:#fafbff}
+.form-group input:focus,.form-group select:focus{border-color:var(--navy);outline:none;background:#fff}
+.form-group input[readonly]{background:#f0f2f5;color:#777}
+.form-actions{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+.tag-auto{background:#e8eaf6;color:var(--navy);border-radius:5px;font-size:11px;padding:1px 7px;font-family:var(--font-head)}
+.import-box{background:#fff;border-radius:var(--radius);box-shadow:var(--card-shadow);padding:20px;margin-bottom:22px;border:2px dashed #c5cae9}
+.import-box h4{font-family:var(--font-head);color:var(--navy-dark);margin-bottom:8px;font-size:14px}
+.import-box p{font-size:12px;color:#888;margin-bottom:10px}
+.import-drop{border:2px dashed #9fa8da;border-radius:8px;padding:16px;text-align:center;cursor:pointer;transition:background .15s;color:#7986cb;font-size:13px}
+.import-drop:hover,.import-drop.dragover{background:#e8eaf6}
+.import-drop input[type=file]{display:none}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(10,20,80,0.45);z-index:500;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:14px;padding:28px;min-width:340px;max-width:96vw;max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,0.22);position:relative}
+.modal h2{font-family:var(--font-head);color:var(--navy-dark);margin-bottom:18px;font-size:18px}
+.modal-close{position:absolute;top:14px;right:16px;background:none;border:none;cursor:pointer;font-size:20px;color:#888}
+.settings-section{background:#fff;border-radius:var(--radius);box-shadow:var(--card-shadow);padding:22px;margin-bottom:20px}
+.settings-section h3{font-family:var(--font-head);color:var(--navy-dark);margin-bottom:14px;font-size:15px;border-bottom:1px solid #e8eaf0;padding-bottom:8px}
+#login-screen{position:fixed;inset:0;background:linear-gradient(135deg,var(--navy-dark) 0%,var(--navy) 60%,#1a3a6e 100%);display:flex;align-items:center;justify-content:center;z-index:9999}
+.login-box{background:#fff;border-radius:16px;padding:38px 36px;min-width:340px;box-shadow:0 12px 50px rgba(0,0,0,0.3);display:flex;flex-direction:column;align-items:center;gap:16px}
+.login-box img{width:80px;border-radius:50%;margin-bottom:4px}
+.login-box h2{font-family:var(--font-head);color:var(--navy-dark);font-size:20px;text-align:center}
+.login-box .sub{color:#888;font-size:12px;font-style:italic;margin-top:-10px}
+.login-box .form-group{width:100%}
+.login-btn{width:100%;background:var(--navy);color:#fff;border:none;border-radius:8px;padding:11px;font-family:var(--font-head);font-size:15px;cursor:pointer;letter-spacing:1px;transition:background .2s}
+.login-btn:hover{background:var(--red)}
+.login-error{color:var(--red);font-size:12px;display:none}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:#f0f2f5}::-webkit-scrollbar-thumb{background:var(--silver);border-radius:3px}
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-box">
+    <img src="APM-LOGO.png" alt="APM" onerror="this.style.display='none'">
+    <h2>Ampah Prah Mortuary</h2>
+    <div class="sub">Management System</div>
+    <div class="form-group"><label>Username</label><input type="text" id="login-user" placeholder="Enter username"></div>
+    <div class="form-group"><label>Password</label><input type="password" id="login-pass" placeholder="Enter password"></div>
+    <div class="login-error" id="login-error">Invalid credentials. Please try again.</div>
+    <button class="login-btn" onclick="doLogin()">LOGIN</button>
+    <div style="font-size:11px;color:#aaa">Admin: admin / admin1234 &nbsp;|&nbsp; Staff: staff / staff1234</div>
+  </div>
+</div>
+
+<div id="sidebar">
+  <div class="sidebar-logo">
+    <img src="APM-LOGO.png" alt="APM" onerror="this.style.display='none'">
+    <div class="co-name">AMPAH PRAH<br>MORTUARY</div>
+    <div class="tagline">Rest As You Live</div>
+  </div>
+  <nav>
+    <div class="nav-section-label">Main</div>
+    <div class="nav-item active" onclick="navigate('dashboard')"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</div>
+    <div class="nav-item" onclick="navigate('finance')"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Finance</div>
+    <div class="nav-section-label">Records</div>
+    <div class="nav-item" onclick="navigate('admissions')"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Admissions</div>
+    <div class="nav-item" onclick="navigate('discharges')"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 14l4 4 4-4"/><path d="M13 4v14"/><path d="M3 20h18"/></svg>Discharges</div>
+    <div class="nav-item" onclick="navigate('removals')"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h5l3 5v3h-8V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>Removals</div>
+    <div class="nav-section-label admin-only">Admin</div>
+    <div class="nav-item admin-only" onclick="navigate('analytics')"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Analytics</div>
+    <div class="nav-item admin-only" onclick="navigate('settings')"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</div>
+  </nav>
+  <div style="padding:14px 18px;border-top:1px solid rgba(255,255,255,0.08)">
+    <div id="sidebar-user" style="color:rgba(255,255,255,0.6);font-size:12px;font-family:var(--font-head);margin-bottom:8px"></div>
+    <button class="btn btn-red btn-sm" style="width:100%" onclick="doLogout()">Logout</button>
+  </div>
+</div>
+
+<div id="main">
+  <div class="topbar">
+    <div class="topbar-title" id="page-title">Dashboard</div>
+    <div class="topbar-right">
+      <span class="role-badge" id="topbar-role">ADMIN</span>
+      <span class="user-badge" id="topbar-user">Admin</span>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="page active" id="page-dashboard">
+    <div class="cards-row">
+      <div class="card"><div class="card-label">Total Cases</div><div class="card-value" id="db-total">0</div></div>
+      <div class="card red"><div class="card-label">In Custody</div><div class="card-value" id="db-custody">0</div></div>
+      <div class="card green"><div class="card-label">Discharged</div><div class="card-value" id="db-discharged">0</div></div>
+      <div class="card silver"><div class="card-label">Total Removals</div><div class="card-value" id="db-removals">0</div></div>
+    </div>
+    <div class="section-head">Cases By Location</div>
+    <div class="chart-box"><canvas id="locationChart"></canvas></div>
+  </div>
+
+  <!-- FINANCE -->
+  <div class="page" id="page-finance">
+    <div class="filter-bar">
+      <label>Month:</label>
+      <select id="fin-month" onchange="renderFinance()"><option value="">All Months</option><option value="1">January</option><option value="2">February</option><option value="3">March</option><option value="4">April</option><option value="5">May</option><option value="6">June</option><option value="7">July</option><option value="8">August</option><option value="9">September</option><option value="10">October</option><option value="11">November</option><option value="12">December</option></select>
+      <label>Year:</label><select id="fin-year" onchange="renderFinance()"><option value="">All Years</option></select>
+      <button class="btn btn-outline btn-sm" onclick="document.getElementById('fin-month').value='';document.getElementById('fin-year').value='';renderFinance()">Clear</button>
+    </div>
+    <div class="cards-row">
+      <div class="card"><div class="card-label">Embalming Fee</div><div class="card-value" id="fin-emb">GH₵0</div></div>
+      <div class="card"><div class="card-label">Cold-room Fee</div><div class="card-value" id="fin-cold">GH₵0</div></div>
+      <div class="card green"><div class="card-label">Total Revenue</div><div class="card-value" id="fin-rev">GH₵0</div></div>
+      <div class="card red"><div class="card-label">Total Expenses</div><div class="card-value" id="fin-exp">GH₵0</div></div>
+      <div class="card silver"><div class="card-label">Net Income</div><div class="card-value" id="fin-net">GH₵0</div></div>
+    </div>
+    <div class="section-head">Expenses</div>
+    <div class="table-wrap">
+      <div class="table-toolbar">
+        <span style="font-family:var(--font-head);font-size:14px;color:var(--navy-dark)">Expense Records</span>
+        <button class="btn btn-primary btn-sm" onclick="openExpenseModal()">+ Add Expense</button>
+      </div>
+      <table><thead><tr><th>#</th><th>Date</th><th>Description</th><th>Unit Cost (GH₵)</th><th>Qty</th><th>Amount (GH₵)</th><th>Actions</th></tr></thead><tbody id="expense-table-body"></tbody></table>
+    </div>
+  </div>
+
+  <!-- ADMISSIONS -->
+  <div class="page" id="page-admissions">
+    <div class="section-head">New Admission</div>
+    <div class="form-card">
+      <div class="form-grid">
+        <div class="form-group"><label>Tag # <span class="tag-auto">Auto-generated</span></label><input type="text" id="adm-tag" readonly placeholder="Auto-generated"></div>
+        <div class="form-group"><label>Name of Deceased</label><input type="text" id="adm-name" placeholder="Full name"></div>
+        <div class="form-group"><label>Age</label><input type="number" id="adm-age" min="0" placeholder="Age"></div>
+        <div class="form-group"><label>Gender</label><select id="adm-gender"><option value="">Select</option><option>Male</option><option>Female</option></select></div>
+        <div class="form-group"><label>Name of Relative</label><input type="text" id="adm-rel" placeholder="Relative's full name"></div>
+        <div class="form-group"><label>Relative's Number</label><input type="text" id="adm-relnum" placeholder="Phone number"></div>
+        <div class="form-group"><label>Hometown</label><input type="text" id="adm-town" placeholder="Hometown"></div>
+        <div class="form-group"><label>Time of Admission</label><input type="time" id="adm-time"></div>
+        <div class="form-group"><label>Type of Storage</label><select id="adm-storage"><option value="">Select</option><option value="Normal">Normal</option><option value="VIP">VIP</option></select></div>
+        <div class="form-group"><label>Date of Admission</label><input type="date" id="adm-date"></div>
+        <div class="form-group"><label>Embalming Fee (GH₵)</label><input type="number" id="adm-embfee" value="350" readonly></div>
+        <div class="form-group"><label>Embalming Receipt #</label><input type="text" id="adm-receipt" placeholder="Receipt number"></div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" onclick="submitAdmission()">Submit Admission</button>
+        <button class="btn btn-outline" onclick="clearAdmissionForm()">Clear</button>
+      </div>
+    </div>
+    <div class="import-box">
+      <h4>📥 Import Admissions from Excel</h4>
+      <p>Columns (in order): Tag, Name, Age, Gender, Relative Name, Relative Phone, Hometown, Time, Storage Type, Date (YYYY-MM-DD), Embalming Fee, Embalming Receipt. Tag column can be left blank to auto-generate.</p>
+      <div class="import-drop" id="adm-drop" onclick="document.getElementById('adm-file').click()" ondragover="dragOver(event,'adm-drop')" ondragleave="dragLeave('adm-drop')" ondrop="dropFile(event,'admissions')">
+        <input type="file" id="adm-file" accept=".xlsx,.xls,.csv" onchange="importExcel(event,'admissions')">📂 Click or drag & drop Excel / CSV file here
+      </div>
+      <div id="adm-import-status" style="margin-top:8px;font-size:12px"></div>
+    </div>
+    <div class="section-head">Admissions Table</div>
+    <div class="filter-bar">
+      <label>Search:</label><input type="text" id="adm-search" placeholder="Name or tag…" oninput="renderAdmissionTable()" style="min-width:150px">
+      <label>Month:</label>
+      <select id="adm-fmonth" onchange="renderAdmissionTable()"><option value="">All</option><option value="01">Jan</option><option value="02">Feb</option><option value="03">Mar</option><option value="04">Apr</option><option value="05">May</option><option value="06">Jun</option><option value="07">Jul</option><option value="08">Aug</option><option value="09">Sep</option><option value="10">Oct</option><option value="11">Nov</option><option value="12">Dec</option></select>
+      <label>Year:</label><select id="adm-fyear" onchange="renderAdmissionTable()"><option value="">All</option></select>
+      <label>Storage:</label><select id="adm-fstorage" onchange="renderAdmissionTable()"><option value="">All</option><option value="Normal">Normal</option><option value="VIP">VIP</option></select>
+      <label>Gender:</label><select id="adm-fgender" onchange="renderAdmissionTable()"><option value="">All</option><option value="Male">Male</option><option value="Female">Female</option></select>
+      <button class="btn btn-outline btn-sm" onclick="clearF(['adm-search','adm-fmonth','adm-fyear','adm-fstorage','adm-fgender']);renderAdmissionTable()">Clear</button>
+      <button class="btn btn-print btn-sm" onclick="printMonthlySummary('admissions')">🖨 Monthly Summary</button>
+    </div>
+    <div class="table-wrap"><div style="overflow-x:auto">
+      <table><thead><tr><th>Tag</th><th>Name</th><th>Age</th><th>Gender</th><th>Relative</th><th>Rel. No.</th><th>Hometown</th><th>Time</th><th>Storage</th><th>Date</th><th>Emb. Fee</th><th>Emb. Receipt</th><th>Print</th></tr></thead><tbody id="admission-table-body"></tbody></table>
+    </div><div id="adm-count" style="padding:8px 18px;font-size:12px;color:#888;font-family:var(--font-head)"></div></div>
+  </div>
+
+  <!-- DISCHARGES -->
+  <div class="page" id="page-discharges">
+    <div class="section-head">New Discharge</div>
+    <div class="form-card">
+      <div class="form-grid">
+        <div class="form-group"><label>Tag #</label><input type="text" id="dis-tag" placeholder="Enter tag to auto-fill" oninput="autofillDischarge()"></div>
+        <div class="form-group"><label>Name of Deceased</label><input type="text" id="dis-name" readonly></div>
+        <div class="form-group"><label>Type of Storage</label><input type="text" id="dis-storage" readonly></div>
+        <div class="form-group"><label>Date of Discharge</label><input type="date" id="dis-date" onchange="calcDischarge()"></div>
+        <div class="form-group"><label>Storage Days</label><input type="number" id="dis-days" readonly placeholder="Auto-calculated"></div>
+        <div class="form-group"><label>Cold-room Fee (GH₵)</label><input type="number" id="dis-fee" readonly placeholder="Auto-calculated"></div>
+        <div class="form-group"><label>Discharge Receipt #</label><input type="text" id="dis-receipt" placeholder="Receipt number"></div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" onclick="submitDischarge()">Submit Discharge</button>
+        <button class="btn btn-outline" onclick="clearDischargeForm()">Clear</button>
+      </div>
+    </div>
+    <div class="import-box">
+      <h4>📥 Import Discharges from Excel</h4>
+      <p>Columns: Tag, Date of Discharge (YYYY-MM-DD), Discharge Receipt. Storage days and cold-room fee are auto-calculated from admission data.</p>
+      <div class="import-drop" id="dis-drop" onclick="document.getElementById('dis-file').click()" ondragover="dragOver(event,'dis-drop')" ondragleave="dragLeave('dis-drop')" ondrop="dropFile(event,'discharges')">
+        <input type="file" id="dis-file" accept=".xlsx,.xls,.csv" onchange="importExcel(event,'discharges')">📂 Click or drag & drop Excel / CSV file here
+      </div>
+      <div id="dis-import-status" style="margin-top:8px;font-size:12px"></div>
+    </div>
+    <div class="section-head">Discharge Table</div>
+    <div class="filter-bar">
+      <label>Search:</label><input type="text" id="dis-search" placeholder="Name or tag…" oninput="renderDischargeTable()" style="min-width:150px">
+      <label>Month:</label>
+      <select id="dis-fmonth" onchange="renderDischargeTable()"><option value="">All</option><option value="01">Jan</option><option value="02">Feb</option><option value="03">Mar</option><option value="04">Apr</option><option value="05">May</option><option value="06">Jun</option><option value="07">Jul</option><option value="08">Aug</option><option value="09">Sep</option><option value="10">Oct</option><option value="11">Nov</option><option value="12">Dec</option></select>
+      <label>Year:</label><select id="dis-fyear" onchange="renderDischargeTable()"><option value="">All</option></select>
+      <label>Storage:</label><select id="dis-fstorage" onchange="renderDischargeTable()"><option value="">All</option><option value="Normal">Normal</option><option value="VIP">VIP</option></select>
+      <button class="btn btn-outline btn-sm" onclick="clearF(['dis-search','dis-fmonth','dis-fyear','dis-fstorage']);renderDischargeTable()">Clear</button>
+      <button class="btn btn-print btn-sm" onclick="printMonthlySummary('discharges')">🖨 Monthly Summary</button>
+    </div>
+    <div class="table-wrap"><div style="overflow-x:auto">
+      <table><thead><tr><th>Tag</th><th>Name</th><th>Storage</th><th>Date Discharged</th><th>Storage Days</th><th>Cold-room Fee</th><th>Receipt</th><th>Print</th></tr></thead><tbody id="discharge-table-body"></tbody></table>
+    </div><div id="dis-count" style="padding:8px 18px;font-size:12px;color:#888;font-family:var(--font-head)"></div></div>
+  </div>
+
+  <!-- REMOVALS -->
+  <div class="page" id="page-removals">
+    <div class="section-head">New Removal</div>
+    <div class="form-card">
+      <div class="form-grid">
+        <div class="form-group"><label>Tag #</label><input type="text" id="rem-tag" placeholder="Enter tag to auto-fill" oninput="autofillRemoval()"></div>
+        <div class="form-group"><label>Name of Deceased</label><input type="text" id="rem-name" readonly></div>
+        <div class="form-group"><label>Relative for Removal</label><input type="text" id="rem-rel" placeholder="Relative name"></div>
+        <div class="form-group"><label>Time In</label><input type="time" id="rem-timein"></div>
+        <div class="form-group"><label>Time Out</label><input type="time" id="rem-timeout"></div>
+        <div class="form-group"><label>Ambulance Reg. No.</label><input type="text" id="rem-ambreg" placeholder="Registration number"></div>
+        <div class="form-group"><label>Ambulance Driver</label><input type="text" id="rem-driver" placeholder="Driver name"></div>
+        <div class="form-group"><label>Driver's Phone</label><input type="text" id="rem-driverphone" placeholder="Phone number"></div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" onclick="submitRemoval()">Submit Removal</button>
+        <button class="btn btn-outline" onclick="clearRemovalForm()">Clear</button>
+      </div>
+    </div>
+    <div class="import-box">
+      <h4>📥 Import Removals from Excel</h4>
+      <p>Columns: Tag, Relative, Time In, Time Out, Ambulance Reg, Driver Name, Driver Phone</p>
+      <div class="import-drop" id="rem-drop" onclick="document.getElementById('rem-file').click()" ondragover="dragOver(event,'rem-drop')" ondragleave="dragLeave('rem-drop')" ondrop="dropFile(event,'removals')">
+        <input type="file" id="rem-file" accept=".xlsx,.xls,.csv" onchange="importExcel(event,'removals')">📂 Click or drag & drop Excel / CSV file here
+      </div>
+      <div id="rem-import-status" style="margin-top:8px;font-size:12px"></div>
+    </div>
+    <div class="section-head">Removals Table</div>
+    <div class="filter-bar">
+      <label>Search:</label><input type="text" id="rem-search" placeholder="Name or tag…" oninput="renderRemovalTable()" style="min-width:150px">
+      <label>Date From:</label><input type="date" id="rem-ffrom" onchange="renderRemovalTable()">
+      <label>To:</label><input type="date" id="rem-fto" onchange="renderRemovalTable()">
+      <button class="btn btn-outline btn-sm" onclick="clearF(['rem-search','rem-ffrom','rem-fto']);renderRemovalTable()">Clear</button>
+      <button class="btn btn-print btn-sm" onclick="printMonthlySummary('removals')">🖨 Summary</button>
+    </div>
+    <div class="table-wrap"><div style="overflow-x:auto">
+      <table><thead><tr><th>Tag</th><th>Name</th><th>Relative</th><th>Time In</th><th>Time Out</th><th>Amb. Reg.</th><th>Driver</th><th>Driver Phone</th></tr></thead><tbody id="removal-table-body"></tbody></table>
+    </div><div id="rem-count" style="padding:8px 18px;font-size:12px;color:#888;font-family:var(--font-head)"></div></div>
+  </div>
+
+  <!-- ANALYTICS -->
+  <div class="page" id="page-analytics">
+    <div class="filter-bar">
+      <label>From:</label><input type="date" id="an-from" onchange="renderAnalytics()">
+      <label>To:</label><input type="date" id="an-to" onchange="renderAnalytics()">
+      <label>Storage:</label><select id="an-storage" onchange="renderAnalytics()"><option value="">All</option><option value="Normal">Normal</option><option value="VIP">VIP</option></select>
+      <button class="btn btn-outline btn-sm" onclick="clearF(['an-from','an-to','an-storage']);renderAnalytics()">Clear</button>
+    </div>
+    <div class="cards-row">
+      <div class="card"><div class="card-label">Total Cases</div><div class="card-value" id="an-total">0</div></div>
+      <div class="card red"><div class="card-label">In Custody</div><div class="card-value" id="an-custody">0</div></div>
+      <div class="card green"><div class="card-label">Discharged</div><div class="card-value" id="an-discharged">0</div></div>
+      <div class="card"><div class="card-label">Embalming Fee</div><div class="card-value" id="an-emb">GH₵0</div></div>
+      <div class="card"><div class="card-label">Cold-room Fee</div><div class="card-value" id="an-cold">GH₵0</div></div>
+      <div class="card green"><div class="card-label">Total Revenue</div><div class="card-value" id="an-rev">GH₵0</div></div>
+      <div class="card red"><div class="card-label">Total Expenses</div><div class="card-value" id="an-exp">GH₵0</div></div>
+      <div class="card silver"><div class="card-label">Net Income</div><div class="card-value" id="an-net">GH₵0</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px">
+      <div class="chart-box"><canvas id="anLocationChart"></canvas></div>
+      <div class="chart-box"><canvas id="anTrendChart"></canvas></div>
+    </div>
+    <div class="chart-box"><canvas id="anRevenueChart"></canvas></div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="page" id="page-settings">
+    <div class="settings-section">
+      <h3>👥 User Management</h3>
+      <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px">
+        <div class="form-group"><label>Username</label><input type="text" id="set-username" placeholder="New username"></div>
+        <div class="form-group"><label>Password</label><input type="password" id="set-password" placeholder="Password"></div>
+        <div class="form-group"><label>Role</label><select id="set-role"><option value="admin">Admin</option><option value="staff">Staff</option></select></div>
+        <button class="btn btn-primary btn-sm" onclick="addUser()">Add User</button>
+      </div>
+      <div style="overflow-x:auto">
+        <table><thead><tr><th>Current Username</th><th>Role</th><th>New Username</th><th>New Password</th><th>Actions</th></tr></thead><tbody id="user-table-body"></tbody></table>
+      </div>
+    </div>
+    <div class="settings-section">
+      <h3>🧾 Edit Receipt Numbers</h3>
+      <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap">
+        <div class="form-group"><label>Table</label><select id="set-rec-table" onchange="loadReceiptRows()"><option value="admissions">Admissions</option><option value="discharges">Discharges</option></select></div>
+        <div class="form-group"><label>Tag #</label><input type="text" id="set-rec-tag" placeholder="Enter tag" oninput="loadReceiptRows()"></div>
+      </div>
+      <div id="set-receipt-result" style="margin-top:14px"></div>
+    </div>
+    <div class="settings-section">
+      <h3>💰 Fee Settings</h3>
+      <div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-end">
+        <div class="form-group"><label>Embalming Fee (GH₵)</label><input type="number" id="set-embfee" value="350" min="0"></div>
+        <div class="form-group"><label>Normal Rate (GH₵/day)</label><input type="number" id="set-normalrate" value="13" min="0"></div>
+        <div class="form-group"><label>VIP Rate (GH₵/day)</label><input type="number" id="set-viprate" value="20" min="0"></div>
+        <button class="btn btn-primary btn-sm" onclick="saveFeeSettings()">Save All</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EXPENSE MODAL -->
+<div class="modal-overlay" id="expense-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('expense-modal')">✕</button>
+    <h2>Add Expense</h2>
+    <div class="form-grid">
+      <div class="form-group" style="grid-column:1/-1"><label>Date</label><input type="date" id="exp-date"></div>
+      <div class="form-group" style="grid-column:1/-1"><label>Description</label><input type="text" id="exp-desc" placeholder="Description"></div>
+      <div class="form-group"><label>Unit Cost (GH₵)</label><input type="number" id="exp-unit" min="0" oninput="calcExpense()"></div>
+      <div class="form-group"><label>Quantity</label><input type="number" id="exp-qty" min="1" value="1" oninput="calcExpense()"></div>
+      <div class="form-group" style="grid-column:1/-1"><label>Amount (GH₵)</label><input type="number" id="exp-amount" readonly></div>
+    </div>
+    <div class="form-actions" style="margin-top:16px">
+      <button class="btn btn-primary" onclick="saveExpense()">Save</button>
+      <button class="btn btn-outline" onclick="closeModal('expense-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- IMPORT PREVIEW MODAL -->
+<div class="modal-overlay" id="import-preview-modal">
+  <div class="modal" style="min-width:min(720px,95vw)">
+    <button class="modal-close" onclick="closeModal('import-preview-modal')">✕</button>
+    <h2 id="import-preview-title">Import Preview</h2>
+    <p id="import-preview-desc" style="font-size:13px;color:#666;margin-bottom:12px"></p>
+    <div style="overflow-x:auto;max-height:360px;margin-bottom:16px"><table id="import-preview-table"><thead></thead><tbody></tbody></table></div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-green" onclick="confirmImport()">✔ Import All</button>
+      <button class="btn btn-outline" onclick="closeModal('import-preview-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===================== DATA =====================
+let DB={users:[{username:'admin',password:'admin1234',role:'admin'},{username:'staff',password:'staff1234',role:'staff'}],admissions:[],discharges:[],removals:[],expenses:[],settings:{embFee:350,normalRate:13,vipRate:20}};
+let currentUser=null,charts={},pendingImport={type:null,rows:[]};
+function loadDB(){const s=localStorage.getItem('apm_db3');if(s)try{const p=JSON.parse(s);DB={...DB,...p};}catch(e){}}
+function saveDB(){localStorage.setItem('apm_db3',JSON.stringify(DB));}
+loadDB();
+
+// ===================== AUTH =====================
+function doLogin(){
+  const u=document.getElementById('login-user').value.trim();
+  const p=document.getElementById('login-pass').value;
+  const user=DB.users.find(x=>x.username===u&&x.password===p);
+  if(user){currentUser=user;document.getElementById('login-screen').style.display='none';document.getElementById('topbar-user').textContent=user.username;document.getElementById('topbar-role').textContent=user.role.toUpperCase();document.getElementById('sidebar-user').textContent=user.username+' ('+user.role+')';applyRoleUI();populateYearDropdowns();navigate('dashboard');renderAll();}
+  else document.getElementById('login-error').style.display='block';
+}
+function doLogout(){currentUser=null;document.getElementById('login-screen').style.display='flex';document.getElementById('login-user').value='';document.getElementById('login-pass').value='';document.getElementById('login-error').style.display='none';}
+function applyRoleUI(){document.querySelectorAll('.admin-only').forEach(el=>el.style.display=currentUser.role==='admin'?'':'none');}
+
+// ===================== NAVIGATION =====================
+const pageTitles={dashboard:'Dashboard',finance:'Finance',admissions:'Admissions',discharges:'Discharges',removals:'Removals',analytics:'Analytics',settings:'Settings'};
+function navigate(page){
+  if((page==='analytics'||page==='settings')&&currentUser?.role!=='admin')return;
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>{if(n.textContent.trim().toLowerCase()===pageTitles[page].toLowerCase())n.classList.add('active');});
+  document.getElementById('page-title').textContent=pageTitles[page];
+  ({dashboard:renderDashboard,finance:renderFinance,admissions:()=>{renderAdmissionTable();setNextTag();},discharges:renderDischargeTable,removals:renderRemovalTable,analytics:renderAnalytics,settings:renderSettings}[page]||(() => {}))();
+}
+
+// ===================== HELPERS =====================
+function sortByTag(arr){return [...arr].sort((a,b)=>{const na=parseInt((a.tag||'').replace(/\D/g,''))||0,nb=parseInt((b.tag||'').replace(/\D/g,''))||0;return na-nb;});}
+function getNextTag(){const nums=DB.admissions.map(r=>parseInt((r.tag||'').replace(/\D/g,''))||0);return 'APM-'+String((nums.length?Math.max(...nums):0)+1).padStart(3,'0');}
+function setNextTag(){document.getElementById('adm-tag').value=getNextTag();}
+function clearF(ids){ids.forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function populateYearDropdowns(){
+  const years=[...new Set([...DB.admissions.map(r=>r.date?.substring(0,4)),...DB.discharges.map(r=>r.dateDischarge?.substring(0,4)),...DB.expenses.map(r=>r.date?.substring(0,4))].filter(Boolean))].sort();
+  const cur=String(new Date().getFullYear());if(!years.includes(cur))years.push(cur);
+  const opt='<option value="">All</option>'+years.map(y=>`<option>${y}</option>`).join('');
+  ['adm-fyear','dis-fyear','fin-year'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=opt;});
+}
+
+// ===================== ADMISSION =====================
+function submitAdmission(){
+  const req=['adm-name','adm-age','adm-gender','adm-rel','adm-relnum','adm-town','adm-time','adm-storage','adm-date','adm-receipt'];
+  for(const f of req)if(!document.getElementById(f).value){alert('Please fill all fields.');return;}
+  const rec={tag:getNextTag(),name:document.getElementById('adm-name').value,age:document.getElementById('adm-age').value,gender:document.getElementById('adm-gender').value,relative:document.getElementById('adm-rel').value,relativeNum:document.getElementById('adm-relnum').value,hometown:document.getElementById('adm-town').value,time:document.getElementById('adm-time').value,storage:document.getElementById('adm-storage').value,date:document.getElementById('adm-date').value,embFee:DB.settings.embFee,embReceipt:document.getElementById('adm-receipt').value};
+  DB.admissions.push(rec);saveDB();populateYearDropdowns();clearAdmissionForm();setNextTag();renderAdmissionTable();
+  alert('Admission recorded: '+rec.tag);
+}
+function clearAdmissionForm(){['adm-name','adm-age','adm-rel','adm-relnum','adm-town','adm-receipt'].forEach(f=>document.getElementById(f).value='');['adm-gender','adm-storage','adm-date','adm-time'].forEach(f=>document.getElementById(f).value='');document.getElementById('adm-embfee').value=DB.settings.embFee;}
+function renderAdmissionTable(){
+  const search=(document.getElementById('adm-search')?.value||'').toLowerCase();
+  const fm=document.getElementById('adm-fmonth')?.value||'',fy=document.getElementById('adm-fyear')?.value||'',fs=document.getElementById('adm-fstorage')?.value||'',fg=document.getElementById('adm-fgender')?.value||'';
+  const rows=sortByTag(DB.admissions).filter(r=>{
+    if(search&&!(r.tag?.toLowerCase().includes(search)||r.name?.toLowerCase().includes(search)))return false;
+    if(fm&&r.date?.substring(5,7)!==fm)return false;
+    if(fy&&r.date?.substring(0,4)!==fy)return false;
+    if(fs&&r.storage!==fs)return false;
+    if(fg&&r.gender!==fg)return false;
+    return true;
+  });
+  document.getElementById('admission-table-body').innerHTML=rows.length?rows.map(r=>`<tr><td><b>${r.tag}</b></td><td>${r.name}</td><td>${r.age}</td><td>${r.gender}</td><td>${r.relative}</td><td>${r.relativeNum}</td><td>${r.hometown}</td><td>${r.time}</td><td><span class="badge badge-${r.storage==='VIP'?'vip':'normal'}">${r.storage}</span></td><td>${r.date}</td><td>GH₵${r.embFee}</td><td>${r.embReceipt}</td><td><button class="btn btn-print btn-sm" onclick="printAdmissionReceipt('${r.tag}')">🖨</button></td></tr>`).join(''):'<tr><td colspan="13" style="text-align:center;color:#aaa;padding:18px">No records found.</td></tr>';
+  document.getElementById('adm-count').textContent=`Showing ${rows.length} of ${DB.admissions.length} records`;
+}
+
+// ===================== DISCHARGE =====================
+function autofillDischarge(){const tag=document.getElementById('dis-tag').value.trim().toUpperCase();const adm=DB.admissions.find(r=>r.tag===tag);document.getElementById('dis-name').value=adm?adm.name:'';document.getElementById('dis-storage').value=adm?adm.storage:'';calcDischarge();}
+function calcDischarge(){
+  const tag=document.getElementById('dis-tag').value.trim().toUpperCase();const adm=DB.admissions.find(r=>r.tag===tag);const dd=document.getElementById('dis-date').value;
+  if(adm&&dd){const days=Math.max(1,Math.floor((new Date(dd)-new Date(adm.date))/86400000)+1);document.getElementById('dis-days').value=days;document.getElementById('dis-fee').value=days*(adm.storage==='VIP'?DB.settings.vipRate:DB.settings.normalRate);}
+}
+function submitDischarge(){
+  const tag=document.getElementById('dis-tag').value.trim().toUpperCase();
+  if(!DB.admissions.find(r=>r.tag===tag)){alert('Tag not found in admissions.');return;}
+  if(DB.discharges.find(r=>r.tag===tag)){alert('This case has already been discharged.');return;}
+  if(!document.getElementById('dis-date').value||!document.getElementById('dis-receipt').value){alert('Fill all fields.');return;}
+  const adm=DB.admissions.find(r=>r.tag===tag);
+  const rec={tag,name:adm.name,storage:adm.storage,dateDischarge:document.getElementById('dis-date').value,storageDays:parseInt(document.getElementById('dis-days').value),coldFee:parseFloat(document.getElementById('dis-fee').value),receipt:document.getElementById('dis-receipt').value};
+  DB.discharges.push(rec);saveDB();populateYearDropdowns();clearDischargeForm();renderDischargeTable();alert('Discharge recorded for '+tag);
+}
+function clearDischargeForm(){['dis-tag','dis-name','dis-storage','dis-date','dis-days','dis-fee','dis-receipt'].forEach(f=>document.getElementById(f).value='');}
+function renderDischargeTable(){
+  const search=(document.getElementById('dis-search')?.value||'').toLowerCase();
+  const fm=document.getElementById('dis-fmonth')?.value||'',fy=document.getElementById('dis-fyear')?.value||'',fs=document.getElementById('dis-fstorage')?.value||'';
+  const rows=sortByTag(DB.discharges).filter(r=>{
+    if(search&&!(r.tag?.toLowerCase().includes(search)||r.name?.toLowerCase().includes(search)))return false;
+    if(fm&&r.dateDischarge?.substring(5,7)!==fm)return false;
+    if(fy&&r.dateDischarge?.substring(0,4)!==fy)return false;
+    if(fs&&r.storage!==fs)return false;
+    return true;
+  });
+  document.getElementById('discharge-table-body').innerHTML=rows.length?rows.map(r=>`<tr><td><b>${r.tag}</b></td><td>${r.name}</td><td><span class="badge badge-${r.storage==='VIP'?'vip':'normal'}">${r.storage}</span></td><td>${r.dateDischarge}</td><td>${r.storageDays}</td><td>GH₵${(r.coldFee||0).toFixed(2)}</td><td>${r.receipt}</td><td><button class="btn btn-print btn-sm" onclick="printDischargeReceipt('${r.tag}')">🖨</button></td></tr>`).join(''):'<tr><td colspan="8" style="text-align:center;color:#aaa;padding:18px">No records found.</td></tr>';
+  document.getElementById('dis-count').textContent=`Showing ${rows.length} of ${DB.discharges.length} records`;
+}
+
+// ===================== REMOVAL =====================
+function autofillRemoval(){const tag=document.getElementById('rem-tag').value.trim().toUpperCase();const adm=DB.admissions.find(r=>r.tag===tag);document.getElementById('rem-name').value=adm?adm.name:'';}
+function submitRemoval(){
+  const tag=document.getElementById('rem-tag').value.trim().toUpperCase();
+  if(!DB.admissions.find(r=>r.tag===tag)){alert('Tag not found.');return;}
+  if(!document.getElementById('rem-rel').value){alert('Fill relative name.');return;}
+  const adm=DB.admissions.find(r=>r.tag===tag);
+  DB.removals.push({tag,name:adm.name,relative:document.getElementById('rem-rel').value,timeIn:document.getElementById('rem-timein').value,timeOut:document.getElementById('rem-timeout').value,ambReg:document.getElementById('rem-ambreg').value,driver:document.getElementById('rem-driver').value,driverPhone:document.getElementById('rem-driverphone').value,date:new Date().toISOString().substring(0,10)});
+  saveDB();clearRemovalForm();renderRemovalTable();alert('Removal recorded for '+tag);
+}
+function clearRemovalForm(){['rem-tag','rem-name','rem-rel','rem-timein','rem-timeout','rem-ambreg','rem-driver','rem-driverphone'].forEach(f=>document.getElementById(f).value='');}
+function renderRemovalTable(){
+  const search=(document.getElementById('rem-search')?.value||'').toLowerCase();
+  const ff=document.getElementById('rem-ffrom')?.value||'',ft=document.getElementById('rem-fto')?.value||'';
+  const rows=sortByTag(DB.removals).filter(r=>{
+    if(search&&!(r.tag?.toLowerCase().includes(search)||r.name?.toLowerCase().includes(search)))return false;
+    if(ff&&r.date&&r.date<ff)return false;
+    if(ft&&r.date&&r.date>ft)return false;
+    return true;
+  });
+  document.getElementById('removal-table-body').innerHTML=rows.length?rows.map(r=>`<tr><td><b>${r.tag}</b></td><td>${r.name}</td><td>${r.relative}</td><td>${r.timeIn||'-'}</td><td>${r.timeOut||'-'}</td><td>${r.ambReg||'-'}</td><td>${r.driver||'-'}</td><td>${r.driverPhone||'-'}</td></tr>`).join(''):'<tr><td colspan="8" style="text-align:center;color:#aaa;padding:18px">No records found.</td></tr>';
+  document.getElementById('rem-count').textContent=`Showing ${rows.length} of ${DB.removals.length} records`;
+}
+
+// ===================== FINANCE =====================
+function renderFinance(){
+  populateYearDropdowns();
+  const m=document.getElementById('fin-month').value,y=document.getElementById('fin-year').value;
+  const fd=date=>(!date)?false:((!y||date.substring(0,4)===y)&&(!m||parseInt(date.substring(5,7))===parseInt(m)));
+  const adms=DB.admissions.filter(r=>m||y?fd(r.date):true);
+  const dis=DB.discharges.filter(r=>m||y?fd(r.dateDischarge):true);
+  const exps=DB.expenses.filter(r=>m||y?fd(r.date):true);
+  const emb=adms.length*DB.settings.embFee,cold=dis.reduce((s,r)=>s+(r.coldFee||0),0),rev=emb+cold,exp=exps.reduce((s,e)=>s+(e.amount||0),0),net=rev-exp;
+  document.getElementById('fin-emb').textContent='GH₵'+emb.toFixed(2);document.getElementById('fin-cold').textContent='GH₵'+cold.toFixed(2);document.getElementById('fin-rev').textContent='GH₵'+rev.toFixed(2);document.getElementById('fin-exp').textContent='GH₵'+exp.toFixed(2);
+  const netEl=document.getElementById('fin-net');netEl.textContent='GH₵'+net.toFixed(2);netEl.style.color=net>=0?'#2e7d32':'#b71c1c';
+  const tbody=document.getElementById('expense-table-body');
+  tbody.innerHTML=exps.length?exps.map((e,i)=>`<tr><td>${i+1}</td><td>${e.date}</td><td>${e.description}</td><td>GH₵${(e.unitCost||0).toFixed(2)}</td><td>${e.qty}</td><td>GH₵${(e.amount||0).toFixed(2)}</td><td>${currentUser?.role==='admin'?`<button class="btn btn-red btn-sm" onclick="deleteExpense(${DB.expenses.indexOf(e)})">Delete</button>`:'–'}</td></tr>`).join(''):'<tr><td colspan="7" style="text-align:center;color:#aaa;padding:18px">No expenses.</td></tr>';
+}
+function openExpenseModal(){document.getElementById('expense-modal').classList.add('open');document.getElementById('exp-date').value=new Date().toISOString().substring(0,10);}
+function calcExpense(){const u=parseFloat(document.getElementById('exp-unit').value)||0,q=parseInt(document.getElementById('exp-qty').value)||1;document.getElementById('exp-amount').value=(u*q).toFixed(2);}
+function saveExpense(){const desc=document.getElementById('exp-desc').value.trim(),unit=parseFloat(document.getElementById('exp-unit').value)||0,qty=parseInt(document.getElementById('exp-qty').value)||1;if(!desc||!unit){alert('Fill description and unit cost.');return;}DB.expenses.push({date:document.getElementById('exp-date').value,description:desc,unitCost:unit,qty,amount:unit*qty});saveDB();closeModal('expense-modal');['exp-desc','exp-unit','exp-amount'].forEach(f=>document.getElementById(f).value='');document.getElementById('exp-qty').value=1;renderFinance();}
+function deleteExpense(idx){if(!confirm('Delete this expense?'))return;DB.expenses.splice(idx,1);saveDB();renderFinance();}
+
+// ===================== DASHBOARD =====================
+function renderDashboard(){
+  const total=DB.admissions.length,dis=DB.discharges.length;
+  document.getElementById('db-total').textContent=total;document.getElementById('db-custody').textContent=total-dis;document.getElementById('db-discharged').textContent=dis;document.getElementById('db-removals').textContent=DB.removals.length;
+  const loc={};DB.admissions.forEach(r=>{const k=r.hometown||'Unknown';loc[k]=(loc[k]||0)+1;});
+  renderLocChart('locationChart',loc);
+}
+function renderLocChart(id,loc){
+  if(charts[id])charts[id].destroy();
+  const ctx=document.getElementById(id)?.getContext('2d');if(!ctx)return;
+  const labels=Object.keys(loc),data=Object.values(loc);
+  charts[id]=new Chart(ctx,{type:'bar',data:{labels:labels.length?labels:['No Data'],datasets:[{label:'Cases',data:data.length?data:[0],backgroundColor:'#1a237e',borderRadius:6}]},options:{responsive:true,plugins:{legend:{display:false},title:{display:true,text:'Cases by Hometown',font:{family:'Oswald',size:14}}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}}});
+}
+
+// ===================== ANALYTICS =====================
+function renderAnalytics(){
+  const from=document.getElementById('an-from').value,to=document.getElementById('an-to').value,st=document.getElementById('an-storage').value;
+  const adms=DB.admissions.filter(r=>{if(from&&r.date<from)return false;if(to&&r.date>to)return false;if(st&&r.storage!==st)return false;return true;});
+  const dis=DB.discharges.filter(r=>{const a=DB.admissions.find(x=>x.tag===r.tag);if(!a)return false;if(from&&a.date<from)return false;if(to&&a.date>to)return false;if(st&&a.storage!==st)return false;return true;});
+  const emb=adms.length*DB.settings.embFee,cold=dis.reduce((s,r)=>s+(r.coldFee||0),0),rev=emb+cold;
+  const exps=(from||to)?DB.expenses.filter(e=>(!from||e.date>=from)&&(!to||e.date<=to)):DB.expenses;
+  const exp=exps.reduce((s,e)=>s+(e.amount||0),0),net=rev-exp;
+  document.getElementById('an-total').textContent=adms.length;document.getElementById('an-custody').textContent=adms.length-dis.length;document.getElementById('an-discharged').textContent=dis.length;
+  document.getElementById('an-emb').textContent='GH₵'+emb.toFixed(2);document.getElementById('an-cold').textContent='GH₵'+cold.toFixed(2);document.getElementById('an-rev').textContent='GH₵'+rev.toFixed(2);document.getElementById('an-exp').textContent='GH₵'+exp.toFixed(2);document.getElementById('an-net').textContent='GH₵'+net.toFixed(2);
+  const loc={};adms.forEach(r=>{const k=r.hometown||'Unknown';loc[k]=(loc[k]||0)+1;});renderLocChart('anLocationChart',loc);
+  const monthly={};adms.forEach(r=>{if(r.date){const m=r.date.substring(0,7);monthly[m]=(monthly[m]||0)+1;}});
+  const mKeys=Object.keys(monthly).sort();
+  if(charts['anTrendChart'])charts['anTrendChart'].destroy();
+  const tc=document.getElementById('anTrendChart')?.getContext('2d');
+  if(tc)charts['anTrendChart']=new Chart(tc,{type:'line',data:{labels:mKeys.length?mKeys:['No Data'],datasets:[{label:'Admissions',data:mKeys.map(k=>monthly[k]),borderColor:'#1a237e',backgroundColor:'rgba(26,35,126,0.1)',tension:.3,fill:true}]},options:{responsive:true,plugins:{title:{display:true,text:'Monthly Admissions Trend',font:{family:'Oswald',size:14}}},scales:{y:{beginAtZero:true}}}});
+  const revM={},coldM={};
+  adms.forEach(r=>{if(r.date){const m=r.date.substring(0,7);revM[m]=(revM[m]||0)+DB.settings.embFee;}});
+  dis.forEach(r=>{const a=DB.admissions.find(x=>x.tag===r.tag);if(a?.date){const m=a.date.substring(0,7);coldM[m]=(coldM[m]||0)+(r.coldFee||0);}});
+  const allMs=[...new Set([...Object.keys(revM),...Object.keys(coldM)])].sort();
+  if(charts['anRevenueChart'])charts['anRevenueChart'].destroy();
+  const rc=document.getElementById('anRevenueChart')?.getContext('2d');
+  if(rc)charts['anRevenueChart']=new Chart(rc,{type:'bar',data:{labels:allMs.length?allMs:['No Data'],datasets:[{label:'Embalming Fee',data:allMs.map(m=>revM[m]||0),backgroundColor:'#1a237e',borderRadius:4},{label:'Cold-room Fee',data:allMs.map(m=>coldM[m]||0),backgroundColor:'#b71c1c',borderRadius:4}]},options:{responsive:true,plugins:{title:{display:true,text:'Revenue Breakdown by Month',font:{family:'Oswald',size:14}}},scales:{y:{beginAtZero:true}}}});
+}
+
+// ===================== SETTINGS =====================
+function renderSettings(){
+  document.getElementById('set-embfee').value=DB.settings.embFee;
+  document.getElementById('set-normalrate').value=DB.settings.normalRate;
+  document.getElementById('set-viprate').value=DB.settings.vipRate;
+  renderUserTable();
+}
+function renderUserTable(){
+  const tbody=document.getElementById('user-table-body');
+  tbody.innerHTML=DB.users.map((u,i)=>`
+    <tr>
+      <td><b>${u.username}</b></td>
+      <td><span class="badge badge-${u.role==='admin'?'admin':'staff'}">${u.role}</span></td>
+      <td><input type="text" id="un-${i}" value="${u.username}" style="border:1.5px solid #dde;border-radius:6px;padding:5px 9px;font-size:12px;width:140px"></td>
+      <td><input type="password" id="up-${i}" placeholder="New password" style="border:1.5px solid #dde;border-radius:6px;padding:5px 9px;font-size:12px;width:150px"></td>
+      <td style="display:flex;gap:6px;align-items:center;padding:9px 12px">
+        <button class="btn btn-primary btn-sm" onclick="saveUserInline(${i})">Save</button>
+        ${i===0?'<span style="color:#aaa;font-size:11px">Protected</span>':`<button class="btn btn-red btn-sm" onclick="deleteUser(${i})">Delete</button>`}
+      </td>
+    </tr>`).join('');
+}
+function saveUserInline(i){
+  const newName=document.getElementById('un-'+i).value.trim();
+  const newPwd=document.getElementById('up-'+i).value;
+  if(!newName){alert('Username cannot be empty.');return;}
+  if(newName!==DB.users[i].username&&DB.users.find((u,j)=>j!==i&&u.username===newName)){alert('Username already taken.');return;}
+  const oldName=DB.users[i].username;
+  DB.users[i].username=newName;
+  if(newPwd)DB.users[i].password=newPwd;
+  saveDB();
+  if(currentUser.username===oldName){currentUser.username=newName;document.getElementById('topbar-user').textContent=newName;document.getElementById('sidebar-user').textContent=newName+' ('+currentUser.role+')';}
+  renderUserTable();alert('User updated successfully.');
+}
+function addUser(){
+  const u=document.getElementById('set-username').value.trim(),p=document.getElementById('set-password').value,r=document.getElementById('set-role').value;
+  if(!u||!p){alert('Enter username and password.');return;}
+  if(DB.users.find(x=>x.username===u)){alert('Username already exists.');return;}
+  DB.users.push({username:u,password:p,role:r});saveDB();renderUserTable();
+  document.getElementById('set-username').value='';document.getElementById('set-password').value='';
+}
+function deleteUser(i){
+  if(i===0){alert('Cannot delete the primary admin.');return;}
+  if(!confirm('Delete user '+DB.users[i].username+'?'))return;
+  DB.users.splice(i,1);saveDB();renderUserTable();
+}
+function saveFeeSettings(){
+  const e=parseFloat(document.getElementById('set-embfee').value),n=parseFloat(document.getElementById('set-normalrate').value),v=parseFloat(document.getElementById('set-viprate').value);
+  if(isNaN(e)||isNaN(n)||isNaN(v)){alert('Invalid values.');return;}
+  DB.settings.embFee=e;DB.settings.normalRate=n;DB.settings.vipRate=v;saveDB();alert('Fee settings saved.');
+}
+function loadReceiptRows(){
+  const table=document.getElementById('set-rec-table').value,tag=document.getElementById('set-rec-tag').value.trim().toUpperCase();
+  const div=document.getElementById('set-receipt-result');
+  if(!tag){div.innerHTML='';return;}
+  const arr=table==='admissions'?DB.admissions:DB.discharges,rec=arr.find(r=>r.tag===tag);
+  if(!rec){div.innerHTML='<span style="color:#b71c1c;font-size:13px">Tag not found.</span>';return;}
+  const field=table==='admissions'?'embReceipt':'receipt';
+  div.innerHTML=`<div style="display:flex;gap:12px;align-items:flex-end"><div class="form-group"><label>Receipt # for ${tag} (${rec.name})</label><input type="text" id="set-rec-val" value="${rec[field]}"></div><button class="btn btn-primary btn-sm" onclick="saveReceiptNum('${table}','${tag}','${field}')">Save</button></div>`;
+}
+function saveReceiptNum(table,tag,field){const arr=table==='admissions'?DB.admissions:DB.discharges,rec=arr.find(r=>r.tag===tag);if(rec){rec[field]=document.getElementById('set-rec-val').value;saveDB();alert('Receipt updated.');}}
+
+// ===================== EXCEL IMPORT =====================
+function dragOver(e,id){e.preventDefault();document.getElementById(id).classList.add('dragover');}
+function dragLeave(id){document.getElementById(id).classList.remove('dragover');}
+function dropFile(e,type){e.preventDefault();const dropId={admissions:'adm-drop',discharges:'dis-drop',removals:'rem-drop'}[type];document.getElementById(dropId).classList.remove('dragover');const file=e.dataTransfer.files[0];if(file)processFile(file,type);}
+function importExcel(event,type){const file=event.target.files[0];if(file)processFile(file,type);event.target.value='';}
+function processFile(file,type){
+  const statusId={admissions:'adm-import-status',discharges:'dis-import-status',removals:'rem-import-status'}[type];
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const data=new Uint8Array(e.target.result);
+      const wb=XLSX.read(data,{type:'array'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const json=XLSX.utils.sheet_to_json(ws,{header:1,raw:false,defval:''});
+      if(json.length<2){document.getElementById(statusId).innerHTML='<span style="color:#b71c1c">No data rows found.</span>';return;}
+      const rows=json.slice(1).filter(r=>r.some(c=>c));
+      const parsed=parseRows(type,rows);
+      if(!parsed.length){document.getElementById(statusId).innerHTML='<span style="color:#b71c1c">No valid rows could be parsed.</span>';return;}
+      showPreview(type,parsed);
+      document.getElementById(statusId).innerHTML=`<span style="color:#2e7d32">✔ ${parsed.length} rows ready. Review the preview and click "Import All".</span>`;
+    }catch(err){document.getElementById(statusId).innerHTML='<span style="color:#b71c1c">Error: '+err.message+'</span>';}
+  };
+  reader.readAsArrayBuffer(file);
+}
+function cv(row,idx){return(row[idx]||'').toString().trim();}
+function normDate(v){if(!v)return new Date().toISOString().substring(0,10);if(/^\d{4}-\d{2}-\d{2}$/.test(v))return v;const d=new Date(v);return isNaN(d)?v:d.toISOString().substring(0,10);}
+function parseRows(type,rows){
+  const parsed=[];
+  if(type==='admissions'){
+    rows.forEach(row=>{
+      const name=cv(row,1);if(!name)return;
+      const rawTag=(cv(row,0)||'').toUpperCase();
+      const tag=rawTag||nextImportTag(parsed);
+      parsed.push({tag,name,age:cv(row,2)||'',gender:cv(row,3)||'',relative:cv(row,4)||'',relativeNum:cv(row,5)||'',hometown:cv(row,6)||'',time:cv(row,7)||'00:00',storage:cv(row,8)||'Normal',date:normDate(cv(row,9)),embFee:parseFloat(cv(row,10))||DB.settings.embFee,embReceipt:cv(row,11)||''});
+    });
+  } else if(type==='discharges'){
+    rows.forEach(row=>{
+      const tag=(cv(row,0)||'').toUpperCase();if(!tag)return;
+      const adm=DB.admissions.find(a=>a.tag===tag);
+      const dd=normDate(cv(row,1));
+      let days=1,cold=0;
+      if(adm&&dd){days=Math.max(1,Math.floor((new Date(dd)-new Date(adm.date))/86400000)+1);cold=days*(adm.storage==='VIP'?DB.settings.vipRate:DB.settings.normalRate);}
+      parsed.push({tag,name:adm?adm.name:'Unknown',storage:adm?adm.storage:'Normal',dateDischarge:dd,storageDays:days,coldFee:cold,receipt:cv(row,2)||''});
+    });
+  } else if(type==='removals'){
+    rows.forEach(row=>{
+      const tag=(cv(row,0)||'').toUpperCase();if(!tag)return;
+      const adm=DB.admissions.find(a=>a.tag===tag);
+      parsed.push({tag,name:adm?adm.name:'Unknown',relative:cv(row,1)||'',timeIn:cv(row,2)||'',timeOut:cv(row,3)||'',ambReg:cv(row,4)||'',driver:cv(row,5)||'',driverPhone:cv(row,6)||'',date:new Date().toISOString().substring(0,10)});
+    });
+  }
+  return parsed;
+}
+function nextImportTag(existing){
+  const allNums=[...DB.admissions,...existing].map(r=>parseInt((r.tag||'').replace(/\D/g,''))||0);
+  return 'APM-'+String((allNums.length?Math.max(...allNums):0)+1).padStart(3,'0');
+}
+function showPreview(type,rows){
+  pendingImport={type,rows};
+  const cols={admissions:['tag','name','age','gender','relative','relativeNum','hometown','time','storage','date','embFee','embReceipt'],discharges:['tag','name','storage','dateDischarge','storageDays','coldFee','receipt'],removals:['tag','name','relative','timeIn','timeOut','ambReg','driver','driverPhone']}[type];
+  document.getElementById('import-preview-title').textContent='Import Preview – '+type.charAt(0).toUpperCase()+type.slice(1);
+  document.getElementById('import-preview-desc').textContent=rows.length+' rows found (showing first 20). Review before importing.';
+  const t=document.getElementById('import-preview-table');
+  t.querySelector('thead').innerHTML='<tr>'+cols.map(c=>`<th style="background:var(--navy);color:#fff;padding:6px 10px;font-size:11px;font-family:var(--font-head);white-space:nowrap">${c}</th>`).join('')+'</tr>';
+  t.querySelector('tbody').innerHTML=rows.slice(0,20).map(r=>'<tr>'+cols.map(c=>`<td style="padding:6px 10px;border-bottom:1px solid #f0f0f5;font-size:12px;white-space:nowrap">${r[c]??''}</td>`).join('')+'</tr>').join('')+(rows.length>20?`<tr><td colspan="${cols.length}" style="padding:8px;color:#888;font-size:12px;text-align:center">…and ${rows.length-20} more rows</td></tr>`:'');
+  document.getElementById('import-preview-modal').classList.add('open');
+}
+function confirmImport(){
+  const{type,rows}=pendingImport;if(!rows.length)return;
+  let added=0,skipped=0;
+  if(type==='admissions'){rows.forEach(r=>{if(DB.admissions.find(a=>a.tag===r.tag)){skipped++;return;}DB.admissions.push(r);added++;});}
+  else if(type==='discharges'){rows.forEach(r=>{if(!DB.admissions.find(a=>a.tag===r.tag)||DB.discharges.find(d=>d.tag===r.tag)){skipped++;return;}DB.discharges.push(r);added++;});}
+  else if(type==='removals'){rows.forEach(r=>{DB.removals.push(r);added++;});}
+  saveDB();populateYearDropdowns();closeModal('import-preview-modal');renderAll();
+  const sid={admissions:'adm-import-status',discharges:'dis-import-status',removals:'rem-import-status'}[type];
+  document.getElementById(sid).innerHTML=`<span style="color:#2e7d32">✔ Imported ${added} rows.${skipped?' Skipped '+skipped+' (duplicates/no admission match).':''}</span>`;
+  alert('Import complete: '+added+' rows added'+(skipped?' ('+skipped+' skipped)':'')+'.');
+}
+
+// ===================== PRINT =====================
+const cH=`<div style="text-align:center;margin-bottom:8px"><div style="font-size:15px;font-weight:bold">AMPAH PRAH MORTUARY</div><div style="font-size:11px">Akim Asuom</div><div style="font-size:11px">P.O. Box 946, Akim Oda</div><div style="font-size:11px">Tel: 0208360777 / 0550420202</div><hr style="margin:6px 0;border:none;border-top:1px dashed #999"></div>`;
+const cF=`<hr style="margin:6px 0;border:none;border-top:1px dashed #999"><div style="text-align:center;font-size:10px;font-style:italic">Rest As You Live</div>`;
+function openPrint(html,w=380,h=600){const win=window.open('','_blank','width='+w+',height='+h);win.document.write(html);win.document.close();}
+function printAdmissionReceipt(tag){
+  const r=DB.admissions.find(a=>a.tag===tag);if(!r)return;
+  openPrint(`<html><head><style>body{font-family:Arial;font-size:12px;width:80mm;margin:0;padding:8px}table{width:100%;border-collapse:collapse}td{padding:2px 0;vertical-align:top}.label{color:#555;font-size:10px;width:45%}.val{font-weight:bold}h3{font-size:13px;margin:6px 0;text-align:center}</style></head><body>${cH}<h3>ADMISSION RECEIPT</h3><table><tr><td class="label">Tag No.:</td><td class="val">${r.tag}</td></tr><tr><td class="label">Name:</td><td class="val">${r.name}</td></tr><tr><td class="label">Age:</td><td>${r.age}</td></tr><tr><td class="label">Gender:</td><td>${r.gender}</td></tr><tr><td class="label">Hometown:</td><td>${r.hometown}</td></tr><tr><td class="label">Storage:</td><td>${r.storage}</td></tr><tr><td class="label">Date:</td><td>${r.date}</td></tr><tr><td class="label">Time:</td><td>${r.time}</td></tr><tr><td class="label">Relative:</td><td>${r.relative}</td></tr><tr><td class="label">Rel. Phone:</td><td>${r.relativeNum}</td></tr><tr><td class="label">Emb. Fee:</td><td class="val">GH₵${r.embFee}</td></tr><tr><td class="label">Receipt #:</td><td>${r.embReceipt}</td></tr></table>${cF}<script>window.onload=function(){window.print();window.close()}<\/script></body></html>`);
+}
+function printDischargeReceipt(tag){
+  const r=DB.discharges.find(d=>d.tag===tag);if(!r)return;
+  openPrint(`<html><head><style>body{font-family:Arial;font-size:12px;width:80mm;margin:0;padding:8px}table{width:100%;border-collapse:collapse}td{padding:2px 0;vertical-align:top}.label{color:#555;font-size:10px;width:45%}.val{font-weight:bold}h3{font-size:13px;margin:6px 0;text-align:center}</style></head><body>${cH}<h3>DISCHARGE RECEIPT</h3><table><tr><td class="label">Tag No.:</td><td class="val">${r.tag}</td></tr><tr><td class="label">Name:</td><td class="val">${r.name}</td></tr><tr><td class="label">Storage:</td><td>${r.storage}</td></tr><tr><td class="label">Date Discharged:</td><td>${r.dateDischarge}</td></tr><tr><td class="label">Storage Days:</td><td>${r.storageDays}</td></tr><tr><td class="label">Cold-room Fee:</td><td class="val">GH₵${(r.coldFee||0).toFixed(2)}</td></tr><tr><td class="label">Receipt #:</td><td>${r.receipt}</td></tr></table>${cF}<script>window.onload=function(){window.print();window.close()}<\/script></body></html>`,380,500);
+}
+
+function printMonthlySummary(type){
+  const MN=['','January','February','March','April','May','June','July','August','September','October','November','December'];
+  const now=new Date();
+  let rows=[],title='',tableHTML='',totals='',period='';
+  if(type==='admissions'){
+    const fm=document.getElementById('adm-fmonth')?.value||'',fy=document.getElementById('adm-fyear')?.value||String(now.getFullYear());
+    period=(fm?MN[parseInt(fm)]+' ':'')+fy;
+    rows=sortByTag(DB.admissions).filter(r=>{
+      if(fm&&r.date?.substring(5,7)!==fm)return false;
+      if(fy&&r.date?.substring(0,4)!==fy)return false;
+      return true;
+    });
+    title='Admissions Summary';
+    const totalEmb=rows.reduce((s,r)=>s+(r.embFee||0),0);
+    tableHTML=`<table><thead><tr><th>Tag</th><th>Name</th><th>Age</th><th>Gender</th><th>Storage</th><th>Date</th><th>Hometown</th><th>Emb. Fee</th><th>Receipt</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${r.tag}</td><td>${r.name}</td><td>${r.age}</td><td>${r.gender}</td><td>${r.storage}</td><td>${r.date}</td><td>${r.hometown}</td><td>GH₵${r.embFee}</td><td>${r.embReceipt}</td></tr>`).join('')}</tbody></table>`;
+    totals=`<div style="background:#f0f2f5;padding:10px 14px;border-radius:6px;margin-bottom:10px;font-size:12px"><b>Total Cases: ${rows.length}</b> &nbsp;|&nbsp; <b>Total Embalming Fee: GH₵${totalEmb.toFixed(2)}</b></div>`;
+  } else if(type==='discharges'){
+    const fm=document.getElementById('dis-fmonth')?.value||'',fy=document.getElementById('dis-fyear')?.value||String(now.getFullYear());
+    period=(fm?MN[parseInt(fm)]+' ':'')+fy;
+    rows=sortByTag(DB.discharges).filter(r=>{
+      if(fm&&r.dateDischarge?.substring(5,7)!==fm)return false;
+      if(fy&&r.dateDischarge?.substring(0,4)!==fy)return false;
+      return true;
+    });
+    title='Discharges Summary';
+    const totalCold=rows.reduce((s,r)=>s+(r.coldFee||0),0);
+    tableHTML=`<table><thead><tr><th>Tag</th><th>Name</th><th>Storage</th><th>Date Discharged</th><th>Days</th><th>Cold Fee</th><th>Receipt</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${r.tag}</td><td>${r.name}</td><td>${r.storage}</td><td>${r.dateDischarge}</td><td>${r.storageDays}</td><td>GH₵${(r.coldFee||0).toFixed(2)}</td><td>${r.receipt}</td></tr>`).join('')}</tbody></table>`;
+    totals=`<div style="background:#f0f2f5;padding:10px 14px;border-radius:6px;margin-bottom:10px;font-size:12px"><b>Total Discharged: ${rows.length}</b> &nbsp;|&nbsp; <b>Total Cold-room Fee: GH₵${totalCold.toFixed(2)}</b></div>`;
+  } else if(type==='removals'){
+    const ff=document.getElementById('rem-ffrom')?.value||'',ft=document.getElementById('rem-fto')?.value||'';
+    period=(ff||ft)?(ff?'From '+ff:'')+(ft?' To '+ft:''):'All Dates';
+    rows=sortByTag(DB.removals).filter(r=>{if(ff&&r.date&&r.date<ff)return false;if(ft&&r.date&&r.date>ft)return false;return true;});
+    title='Removals Summary';
+    tableHTML=`<table><thead><tr><th>Tag</th><th>Name</th><th>Relative</th><th>Time In</th><th>Time Out</th><th>Amb. Reg.</th><th>Driver</th><th>Phone</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${r.tag}</td><td>${r.name}</td><td>${r.relative}</td><td>${r.timeIn||'-'}</td><td>${r.timeOut||'-'}</td><td>${r.ambReg||'-'}</td><td>${r.driver||'-'}</td><td>${r.driverPhone||'-'}</td></tr>`).join('')}</tbody></table>`;
+    totals=`<div style="background:#f0f2f5;padding:10px 14px;border-radius:6px;margin-bottom:10px;font-size:12px"><b>Total Removals: ${rows.length}</b></div>`;
+  }
+  const html=`<html><head><style>body{font-family:Arial;font-size:11px;margin:14px}h2{font-size:15px;text-align:center;margin:4px 0}h3{font-size:13px;text-align:center;margin:2px 0;color:#333}table{width:100%;border-collapse:collapse;margin-top:10px}th{background:#1a237e;color:#fff;padding:6px 8px;text-align:left}td{padding:5px 8px;border-bottom:1px solid #eee}tr:nth-child(even){background:#f5f7ff}.footer{text-align:center;font-style:italic;font-size:10px;margin-top:12px}@media print{@page{margin:10mm}}</style></head><body>
+    <div style="text-align:center"><h2>AMPAH PRAH MORTUARY</h2><div style="font-size:11px">Akim Asuom &nbsp;|&nbsp; P.O. Box 946, Akim Oda &nbsp;|&nbsp; Tel: 0208360777 / 0550420202</div><hr style="margin:8px 0"><h3>${title} — ${period}</h3><div style="font-size:10px;color:#666">Printed: ${new Date().toLocaleString()}</div></div><hr style="margin:8px 0">
+    ${totals}${rows.length?tableHTML:'<p style="text-align:center;color:#888;padding:20px">No records for this period.</p>'}
+    <div class="footer">Rest As You Live</div>
+    <script>window.onload=function(){window.print();}<\/script>
+  </body></html>`;
+  openPrint(html,900,700);
+}
+
+// ===================== INIT =====================
+function renderAll(){renderDashboard();renderFinance();renderAdmissionTable();renderDischargeTable();renderRemovalTable();}
+document.getElementById('login-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+document.getElementById('login-user').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('login-pass').focus();});
+</script>
+</body>
+</html>
