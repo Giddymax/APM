@@ -137,8 +137,8 @@ td{padding:9px 12px;color:#333;vertical-align:middle}
   </div>
   <nav>
     <div class="nav-section-label">Main</div>
-    <div class="nav-item active" onclick="navigate('dashboard')"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</div>
-    <div class="nav-item" onclick="navigate('finance')"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Finance</div>
+    <div class="nav-item active admin-only" onclick="navigate('dashboard')"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</div>
+    <div class="nav-item admin-only" onclick="navigate('finance')"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Finance</div>
     <div class="nav-section-label">Records</div>
     <div class="nav-item" onclick="navigate('admissions')"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Admissions</div>
     <div class="nav-item" onclick="navigate('discharges')"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 14l4 4 4-4"/><path d="M13 4v14"/><path d="M3 20h18"/></svg>Discharges</div>
@@ -219,6 +219,7 @@ td{padding:9px 12px;color:#333;vertical-align:middle}
       <select id="fin-month" onchange="renderFinance()"><option value="">All Months</option><option value="1">January</option><option value="2">February</option><option value="3">March</option><option value="4">April</option><option value="5">May</option><option value="6">June</option><option value="7">July</option><option value="8">August</option><option value="9">September</option><option value="10">October</option><option value="11">November</option><option value="12">December</option></select>
       <label>Year:</label><select id="fin-year" onchange="renderFinance()"><option value="">All Years</option></select>
       <button class="btn btn-outline btn-sm" onclick="document.getElementById('fin-month').value='';document.getElementById('fin-year').value='';renderFinance()">Clear</button>
+      <button class="btn btn-print btn-sm" onclick="printRevenueBreakdown()">🖨 Print Revenue Breakdown</button>
     </div>
     <div class="cards-row">
       <div class="card"><div class="card-label">Embalming Fee</div><div class="card-value" id="fin-emb">GH₵0</div></div>
@@ -348,6 +349,7 @@ td{padding:9px 12px;color:#333;vertical-align:middle}
         <div class="form-group"><label>Ambulance Reg. No.</label><input type="text" id="rem-ambreg" placeholder="Registration number"></div>
         <div class="form-group"><label>Ambulance Driver</label><input type="text" id="rem-driver" placeholder="Driver name"></div>
         <div class="form-group"><label>Driver's Phone</label><input type="text" id="rem-driverphone" placeholder="Phone number"></div>
+        <div class="form-group"><label>Driver's Location</label><input type="text" id="rem-driverlocation" placeholder="Town / area"></div>
       </div>
       <div class="form-actions">
         <button class="btn btn-primary" onclick="submitRemoval()">Submit Removal</button>
@@ -372,7 +374,7 @@ td{padding:9px 12px;color:#333;vertical-align:middle}
       <button class="btn btn-print btn-sm" onclick="printMonthlySummary('removals')">🖨 Summary</button>
     </div>
     <div class="table-wrap"><div style="overflow-x:auto">
-      <table><thead><tr><th>Tag</th><th>Name</th><th>Relative</th><th>Time In</th><th>Time Out</th><th>Amb. Reg.</th><th>Driver</th><th>Driver Phone</th><th>Actions</th></tr></thead><tbody id="removal-table-body"></tbody></table>
+      <table><thead><tr><th>Tag</th><th>Name</th><th>Relative</th><th>Time In</th><th>Time Out</th><th>Amb. Reg.</th><th>Driver</th><th>Driver Phone</th><th>Driver Location</th><th>Actions</th></tr></thead><tbody id="removal-table-body"></tbody></table>
     </div><div id="rem-count" style="padding:8px 18px;font-size:12px;color:#888;font-family:var(--font-head)"></div></div>
   </div>
 
@@ -633,6 +635,7 @@ td{padding:9px 12px;color:#333;vertical-align:middle}
       <div class="form-group"><label>Ambulance Reg. No.</label><input type="text" id="edit-rem-ambreg"></div>
       <div class="form-group"><label>Ambulance Driver</label><input type="text" id="edit-rem-driver"></div>
       <div class="form-group"><label>Driver's Phone</label><input type="text" id="edit-rem-driverphone"></div>
+      <div class="form-group"><label>Driver's Location</label><input type="text" id="edit-rem-driverlocation" placeholder="Town / area"></div>
     </div>
     <div class="form-actions" style="margin-top:16px">
       <button class="btn btn-primary" onclick="saveEditRemoval()">Save Changes</button>
@@ -684,7 +687,7 @@ function doLogin(){
   const u=document.getElementById('login-user').value.trim();
   const p=document.getElementById('login-pass').value;
   const user=DB.users.find(x=>x.username===u&&x.password===p);
-  if(user){currentUser=user;document.getElementById('login-screen').style.display='none';document.getElementById('topbar-user').textContent=user.username;document.getElementById('topbar-role').textContent=user.role.toUpperCase();document.getElementById('sidebar-user').textContent=user.username+' ('+user.role+')';applyRoleUI();populateYearDropdowns();navigate('dashboard');renderAll();auditLog('Login','User logged in');saveDB();resetSessionTimer();}
+  if(user){currentUser=user;document.getElementById('login-screen').style.display='none';document.getElementById('topbar-user').textContent=user.username;document.getElementById('topbar-role').textContent=user.role.toUpperCase();document.getElementById('sidebar-user').textContent=user.username+' ('+user.role+')';applyRoleUI();populateYearDropdowns();navigate(user.role==='admin'?'dashboard':'admissions');renderAll();auditLog('Login','User logged in');saveDB();resetSessionTimer();}
   else document.getElementById('login-error').style.display='block';
 }
 function doLogout(){auditLog('Logout','User logged out');saveDB();currentUser=null;clearTimeout(_sessionTimer);document.getElementById('login-screen').style.display='flex';document.getElementById('login-user').value='';document.getElementById('login-pass').value='';document.getElementById('login-error').style.display='none';}
@@ -693,7 +696,7 @@ function applyRoleUI(){document.querySelectorAll('.admin-only').forEach(el=>el.s
 // ===================== NAVIGATION =====================
 const pageTitles={dashboard:'Dashboard',finance:'Finance',admissions:'Admissions',discharges:'Discharges',removals:'Removals',complaints:'Complaints',analytics:'Analytics',settings:'Settings'};
 function navigate(page){
-  if((page==='analytics'||page==='settings')&&currentUser?.role!=='admin')return;
+  if((page==='analytics'||page==='settings'||page==='dashboard'||page==='finance')&&currentUser?.role!=='admin')return;
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
@@ -795,10 +798,10 @@ function submitRemoval(){
   if(!DB.admissions.find(r=>r.tag===tag)){alert('Tag not found.');return;}
   if(!document.getElementById('rem-rel').value){alert('Fill relative name.');return;}
   const adm=DB.admissions.find(r=>r.tag===tag);
-  DB.removals.push({tag,name:adm.name,relative:document.getElementById('rem-rel').value,timeIn:document.getElementById('rem-timein').value,timeOut:document.getElementById('rem-timeout').value,ambReg:document.getElementById('rem-ambreg').value,driver:document.getElementById('rem-driver').value,driverPhone:document.getElementById('rem-driverphone').value,date:new Date().toISOString().substring(0,10)});
+  DB.removals.push({tag,name:adm.name,relative:document.getElementById('rem-rel').value,timeIn:document.getElementById('rem-timein').value,timeOut:document.getElementById('rem-timeout').value,ambReg:document.getElementById('rem-ambreg').value,driver:document.getElementById('rem-driver').value,driverPhone:document.getElementById('rem-driverphone').value,driverLocation:document.getElementById('rem-driverlocation').value,date:new Date().toISOString().substring(0,10)});
   saveDB();clearRemovalForm();renderRemovalTable();alert('Removal recorded for '+tag);
 }
-function clearRemovalForm(){['rem-tag','rem-name','rem-rel','rem-timein','rem-timeout','rem-ambreg','rem-driver','rem-driverphone'].forEach(f=>document.getElementById(f).value='');}
+function clearRemovalForm(){['rem-tag','rem-name','rem-rel','rem-timein','rem-timeout','rem-ambreg','rem-driver','rem-driverphone','rem-driverlocation'].forEach(f=>document.getElementById(f).value='');}
 function renderRemovalTable(){
   const search=(document.getElementById('rem-search')?.value||'').toLowerCase();
   const ff=document.getElementById('rem-ffrom')?.value||'',ft=document.getElementById('rem-fto')?.value||'',ftown=(document.getElementById('rem-ftown')?.value||'').toLowerCase();
@@ -809,7 +812,7 @@ function renderRemovalTable(){
     if(ftown){const adm=DB.admissions.find(a=>a.tag===r.tag);if(!(adm?.hometown?.toLowerCase().includes(ftown)))return false;}
     return true;
   });
-  document.getElementById('removal-table-body').innerHTML=rows.length?rows.map(r=>`<tr><td><b>${r.tag}</b></td><td>${r.name}</td><td>${r.relative}</td><td>${r.timeIn||'-'}</td><td>${r.timeOut||'-'}</td><td>${r.ambReg||'-'}</td><td>${r.driver||'-'}</td><td>${r.driverPhone||'-'}</td><td><div class="action-cell"><button class="btn btn-edit btn-sm" onclick="openEditRemoval('${r.tag}',${DB.removals.indexOf(r)})" title="Edit">✏️</button><button class="btn btn-delete btn-sm" onclick="deleteRemoval(${DB.removals.indexOf(r)})" title="Delete">🗑</button></div></td></tr>`).join(''):'<tr><td colspan="9" style="text-align:center;color:#aaa;padding:18px">No records found.</td></tr>';
+  document.getElementById('removal-table-body').innerHTML=rows.length?rows.map(r=>`<tr><td><b>${r.tag}</b></td><td>${r.name}</td><td>${r.relative}</td><td>${r.timeIn||'-'}</td><td>${r.timeOut||'-'}</td><td>${r.ambReg||'-'}</td><td>${r.driver||'-'}</td><td>${r.driverPhone||'-'}</td><td>${r.driverLocation||'-'}</td><td><div class="action-cell"><button class="btn btn-edit btn-sm" onclick="openEditRemoval('${r.tag}',${DB.removals.indexOf(r)})" title="Edit">✏️</button><button class="btn btn-delete btn-sm" onclick="deleteRemoval(${DB.removals.indexOf(r)})" title="Delete">🗑</button></div></td></tr>`).join(''):'<tr><td colspan="10" style="text-align:center;color:#aaa;padding:18px">No records found.</td></tr>';
   document.getElementById('rem-count').textContent=`Showing ${rows.length} of ${DB.removals.length} records`;
 }
 
@@ -846,6 +849,59 @@ function exportFinanceExcel(){
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(expRows),'Expenses');
   XLSX.writeFile(wb,'APM_Finance_Export.xlsx');
   auditLog('Finance Export','Exported finance data to Excel');saveDB();
+}
+function printRevenueBreakdown(){
+  const m=document.getElementById('fin-month').value;
+  const y=document.getElementById('fin-year').value;
+  const monthNames=['','January','February','March','April','May','June','July','August','September','October','November','December'];
+  const fd=date=>(!date)?false:((!y||date.substring(0,4)===y)&&(!m||parseInt(date.substring(5,7))===parseInt(m)));
+  // Build monthly breakdown filtered by selection
+  const months={};
+  DB.admissions.filter(r=>(!m&&!y)||fd(r.date)).forEach(r=>{if(!r.date)return;const k=r.date.substring(0,7);if(!months[k])months[k]={adm:0,emb:0,dis:0,cold:0};months[k].adm++;months[k].emb+=parseFloat(r.embFee)||DB.settings.embFee;});
+  DB.discharges.filter(r=>(!m&&!y)||fd(r.dateDischarge)).forEach(r=>{if(!r.dateDischarge)return;const k=r.dateDischarge.substring(0,7);if(!months[k])months[k]={adm:0,emb:0,dis:0,cold:0};months[k].dis++;months[k].cold+=r.coldFee||0;});
+  const mKeys=Object.keys(months).sort();
+  let totalEmb=0,totalCold=0;
+  const rows=mKeys.map(k=>{const mn=months[k];const tot=mn.emb+mn.cold;totalEmb+=mn.emb;totalCold+=mn.cold;const [yr,mo]=k.split('-');return`<tr><td>${monthNames[parseInt(mo)]} ${yr}</td><td>${mn.adm}</td><td>GH&#8373;${mn.emb.toFixed(2)}</td><td>${mn.dis}</td><td>GH&#8373;${mn.cold.toFixed(2)}</td><td><b>GH&#8373;${tot.toFixed(2)}</b></td></tr>`;}).join('');
+  const grandTotal=totalEmb+totalCold;
+  const filterLabel=y?(m?`${monthNames[parseInt(m)]} ${y}`:y):'All Years';
+  const branch=DB.settings.branchName||'ASUOM BRANCH';
+  const win=window.open('','_blank','width=820,height=700');
+  win.document.write(`<!DOCTYPE html><html><head><title>Revenue Breakdown – ${filterLabel}</title>
+  <style>
+    body{font-family:'Segoe UI',sans-serif;padding:32px;color:#222;font-size:13px}
+    h2{font-size:20px;margin-bottom:2px;color:#0d1457}
+    .sub{color:#666;font-size:12px;margin-bottom:20px}
+    table{width:100%;border-collapse:collapse;margin-top:12px}
+    thead th{background:#1a237e;color:#fff;padding:9px 12px;text-align:left;font-size:12px}
+    tbody tr:nth-child(even){background:#f5f7ff}
+    td{padding:8px 12px;border-bottom:1px solid #e8eaf0}
+    tfoot td{background:#0d1457;color:#fff;font-weight:bold;padding:9px 12px}
+    .summary{display:flex;gap:24px;margin-bottom:24px;flex-wrap:wrap}
+    .s-card{border:1px solid #dde;border-radius:8px;padding:12px 20px;min-width:140px}
+    .s-card .lbl{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.5px}
+    .s-card .val{font-size:18px;font-weight:bold;color:#0d1457;margin-top:2px}
+    .s-card.green .val{color:#2e7d32}
+    .print-date{font-size:11px;color:#aaa;margin-top:24px;text-align:right}
+    @media print{body{padding:16px}.no-print{display:none}}
+    *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
+  </style></head><body>
+  <h2>APM Mortuary – Revenue Breakdown</h2>
+  <div class="sub">${branch} &nbsp;|&nbsp; Period: <b>${filterLabel}</b></div>
+  <div class="summary">
+    <div class="s-card"><div class="lbl">Embalming Fee</div><div class="val">GH&#8373;${totalEmb.toFixed(2)}</div></div>
+    <div class="s-card"><div class="lbl">Cold-room Fee</div><div class="val">GH&#8373;${totalCold.toFixed(2)}</div></div>
+    <div class="s-card green"><div class="lbl">Total Revenue</div><div class="val">GH&#8373;${grandTotal.toFixed(2)}</div></div>
+  </div>
+  <table>
+    <thead><tr><th>Month</th><th>Admissions</th><th>Emb. Fee (GH&#8373;)</th><th>Discharges</th><th>Cold Fee (GH&#8373;)</th><th>Total Revenue (GH&#8373;)</th></tr></thead>
+    <tbody>${rows||'<tr><td colspan="6" style="text-align:center;color:#aaa;padding:14px">No data for selected period.</td></tr>'}</tbody>
+    <tfoot><tr><td><b>TOTAL</b></td><td><b>${mKeys.reduce((s,k)=>s+months[k].adm,0)}</b></td><td>GH&#8373;${totalEmb.toFixed(2)}</td><td><b>${mKeys.reduce((s,k)=>s+months[k].dis,0)}</b></td><td>GH&#8373;${totalCold.toFixed(2)}</td><td>GH&#8373;${grandTotal.toFixed(2)}</td></tr></tfoot>
+  </table>
+  <div class="print-date">Printed: ${new Date().toLocaleString()}</div>
+  <br><button class="no-print" onclick="window.print()" style="padding:8px 18px;background:#1a237e;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px">🖨 Print</button>
+  </body></html>`);
+  win.document.close();
+  win.focus();
 }
 function openExpenseModal(){document.getElementById('expense-modal').classList.add('open');document.getElementById('exp-date').value=new Date().toISOString().substring(0,10);}
 function calcExpense(){const u=parseFloat(document.getElementById('exp-unit').value)||0,q=parseInt(document.getElementById('exp-qty').value)||1;document.getElementById('exp-amount').value=(u*q).toFixed(2);}
@@ -1101,7 +1157,7 @@ function nextImportTag(existing){
 }
 function showPreview(type,rows){
   pendingImport={type,rows};
-  const cols={admissions:['tag','name','age','gender','relative','relativeNum','hometown','time','storage','date','embFee','embReceipt'],discharges:['tag','name','storage','dateDischarge','storageDays','coldFee','receipt'],removals:['tag','name','relative','timeIn','timeOut','ambReg','driver','driverPhone']}[type];
+  const cols={admissions:['tag','name','age','gender','relative','relativeNum','hometown','time','storage','date','embFee','embReceipt'],discharges:['tag','name','storage','dateDischarge','storageDays','coldFee','receipt'],removals:['tag','name','relative','timeIn','timeOut','ambReg','driver','driverPhone','driverLocation']}[type];
   document.getElementById('import-preview-title').textContent='Import Preview – '+type.charAt(0).toUpperCase()+type.slice(1);
   document.getElementById('import-preview-desc').textContent=rows.length+' rows found (showing first 20). Review before importing.';
   const t=document.getElementById('import-preview-table');
@@ -1217,7 +1273,7 @@ function printMonthlySummary(type){
     period=(ff||ft)?(ff?'From '+ff:'')+(ft?' To '+ft:''):'All Dates';
     rows=sortByTag(DB.removals).filter(r=>{if(ff&&r.date&&r.date<ff)return false;if(ft&&r.date&&r.date>ft)return false;return true;});
     title='Removals Summary';
-    tableHTML=`<table><thead><tr><th>Tag</th><th>Name</th><th>Relative</th><th>Time In</th><th>Time Out</th><th>Amb. Reg.</th><th>Driver</th><th>Phone</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${r.tag}</td><td>${r.name}</td><td>${r.relative}</td><td>${r.timeIn||'-'}</td><td>${r.timeOut||'-'}</td><td>${r.ambReg||'-'}</td><td>${r.driver||'-'}</td><td>${r.driverPhone||'-'}</td></tr>`).join('')}</tbody></table>`;
+    tableHTML=`<table><thead><tr><th>Tag</th><th>Name</th><th>Relative</th><th>Time In</th><th>Time Out</th><th>Amb. Reg.</th><th>Driver</th><th>Phone</th><th>Driver Location</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${r.tag}</td><td>${r.name}</td><td>${r.relative}</td><td>${r.timeIn||'-'}</td><td>${r.timeOut||'-'}</td><td>${r.ambReg||'-'}</td><td>${r.driver||'-'}</td><td>${r.driverPhone||'-'}</td><td>${r.driverLocation||'-'}</td></tr>`).join('')}</tbody></table>`;
     totals=`<div style="background:#f0f2f5;padding:10px 14px;border-radius:6px;margin-bottom:10px;font-size:12px"><b>Total Removals: ${rows.length}</b></div>`;
   }
   const html=`<html><head><style>body{font-family:Arial;font-size:11px;margin:14px}h2{font-size:15px;text-align:center;margin:4px 0}h3{font-size:13px;text-align:center;margin:2px 0;color:#333}table{width:100%;border-collapse:collapse;margin-top:10px}th{background:#1a237e;color:#fff;padding:6px 8px;text-align:left}td{padding:5px 8px;border-bottom:1px solid #eee}tr:nth-child(even){background:#f5f7ff}.footer{text-align:center;font-style:italic;font-size:10px;margin-top:12px}@media print{@page{margin:10mm}}</style></head><body>
@@ -1334,6 +1390,7 @@ function openEditRemoval(tag,idx){
   document.getElementById('edit-rem-ambreg').value=r.ambReg||'';
   document.getElementById('edit-rem-driver').value=r.driver||'';
   document.getElementById('edit-rem-driverphone').value=r.driverPhone||'';
+  document.getElementById('edit-rem-driverlocation').value=r.driverLocation||'';
   document.getElementById('edit-removal-modal').classList.add('open');
 }
 function saveEditRemoval(){
@@ -1345,6 +1402,7 @@ function saveEditRemoval(){
   r.ambReg=document.getElementById('edit-rem-ambreg').value;
   r.driver=document.getElementById('edit-rem-driver').value;
   r.driverPhone=document.getElementById('edit-rem-driverphone').value;
+  r.driverLocation=document.getElementById('edit-rem-driverlocation').value;
   saveDB();closeModal('edit-removal-modal');renderRemovalTable();
   alert('Removal updated successfully.');
 }
