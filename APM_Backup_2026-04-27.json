@@ -4673,6 +4673,62 @@
       "date": "2026-04-21",
       "embFee": 350,
       "embReceipt": "00000338"
+    },
+    {
+      "tag": "APM-334",
+      "name": "Yaa Owusua",
+      "age": "33",
+      "gender": "Female",
+      "relative": "Akua Twumwaa",
+      "relativeNum": "0544489271",
+      "hometown": "Bomso",
+      "time": "19:30",
+      "storage": "VIP",
+      "date": "2026-04-20",
+      "embFee": 350,
+      "embReceipt": "00000339"
+    },
+    {
+      "tag": "APM-335",
+      "name": "Selina Asantewaa",
+      "age": "86",
+      "gender": "Female",
+      "relative": "Dickson Asante",
+      "relativeNum": "0532089205",
+      "hometown": "Tweapease",
+      "time": "17:00",
+      "storage": "Normal",
+      "date": "2026-04-22",
+      "embFee": 350,
+      "embReceipt": "00000340"
+    },
+    {
+      "tag": "APM-336",
+      "name": "Esther Narkie",
+      "age": "70",
+      "gender": "Female",
+      "relative": "Stephen Bio",
+      "relativeNum": "0543779606",
+      "hometown": "Akawani",
+      "time": "01:00",
+      "storage": "VIP",
+      "date": "2026-04-24",
+      "embFee": 350,
+      "embReceipt": "00000341"
+    },
+    {
+      "tag": "APM-337",
+      "name": "Vida Korang",
+      "age": "72",
+      "gender": "Female",
+      "relative": "Kwaku Nketiah",
+      "relativeNum": "0248514599",
+      "hometown": "Senkubenase",
+      "time": "14:10",
+      "storage": "Normal",
+      "date": "2026-04-24",
+      "embFee": 350,
+      "embReceipt": "00000342"
     }
   ],
   "discharges": [
@@ -7035,15 +7091,6 @@
       "receipt": "00000270"
     },
     {
-      "tag": "APM-326",
-      "name": "Yaa Ofosua",
-      "storage": "VIP",
-      "dateDischarge": "2026-05-01",
-      "storageDays": 26,
-      "coldFee": 338,
-      "receipt": "00000274"
-    },
-    {
       "tag": "212",
       "name": "Tetteh Wayoe",
       "storage": "Normal",
@@ -7078,6 +7125,24 @@
       "storageDays": 55,
       "coldFee": 715,
       "receipt": "00000279"
+    },
+    {
+      "tag": "225",
+      "name": "Samuel Kikisi",
+      "storage": "Normal",
+      "dateDischarge": "2026-05-01",
+      "storageDays": 197,
+      "coldFee": 2561,
+      "receipt": "00000280"
+    },
+    {
+      "tag": "APM-326",
+      "name": "Yaa Ofosua",
+      "storage": "VIP",
+      "dateDischarge": "2026-05-01",
+      "storageDays": 26,
+      "coldFee": 520,
+      "receipt": "00000274"
     }
   ],
   "removals": [
@@ -7433,6 +7498,90 @@
   "expenses": [],
   "complaints": [],
   "auditLog": [
+    {
+      "time": "2026-04-27T12:58:08.984Z",
+      "user": "admin",
+      "action": "Discharge Added",
+      "details": "APM-326 — Yaa Ofosua"
+    },
+    {
+      "time": "2026-04-27T12:54:00.290Z",
+      "user": "admin",
+      "action": "Discharge Added",
+      "details": "225 — Samuel Kikisi"
+    },
+    {
+      "time": "2026-04-27T12:52:52.062Z",
+      "user": "admin",
+      "action": "Admission Edited",
+      "details": "APM-335 — Selina Asantewaa"
+    },
+    {
+      "time": "2026-04-27T12:51:16.588Z",
+      "user": "admin",
+      "action": "Admission Added",
+      "details": "APM-337 — Vida Korang"
+    },
+    {
+      "time": "2026-04-27T12:48:55.581Z",
+      "user": "admin",
+      "action": "Admission Added",
+      "details": "APM-336 — Esther Narkie"
+    },
+    {
+      "time": "2026-04-27T12:46:15.162Z",
+      "user": "admin",
+      "action": "Admission Edited",
+      "details": "APM-335 — Selina Asantewaa"
+    },
+    {
+      "time": "2026-04-27T12:42:23.644Z",
+      "user": "admin",
+      "action": "Admission Added",
+      "details": "APM-335 — Selina Asantewaa"
+    },
+    {
+      "time": "2026-04-27T12:37:04.188Z",
+      "user": "admin",
+      "action": "Login",
+      "details": "User logged in"
+    },
+    {
+      "time": "2026-04-25T07:53:34.227Z",
+      "user": "admin",
+      "action": "Login",
+      "details": "User logged in"
+    },
+    {
+      "time": "2026-04-23T20:12:38.203Z",
+      "user": "admin",
+      "action": "Login",
+      "details": "User logged in"
+    },
+    {
+      "time": "2026-04-21T15:31:14.436Z",
+      "user": "admin",
+      "action": "Admission Added",
+      "details": "APM-334 — Yaa Owusua"
+    },
+    {
+      "time": "2026-04-21T15:13:38.549Z",
+      "user": "admin",
+      "action": "Login",
+      "details": "User logged in"
+    },
+    {
+      "time": "2026-04-21T15:12:43.515Z",
+      "user": "admin",
+      "action": "Logout",
+      "details": "User logged out"
+    },
+    {
+      "time": "2026-04-21T13:25:45.126Z",
+      "user": "admin",
+      "action": "Backup Exported",
+      "details": "Full database backup downloaded"
+    },
     {
       "time": "2026-04-21T13:23:13.949Z",
       "user": "admin",
