@@ -869,7 +869,11 @@ function printRevenueBreakdown(){
   win.document.write(`<!DOCTYPE html><html><head><title>Revenue Breakdown – ${filterLabel}</title>
   <style>
     body{font-family:'Segoe UI',sans-serif;padding:32px;color:#222;font-size:13px}
-    h2{font-size:20px;margin-bottom:2px;color:#0d1457}
+    .header{display:flex;align-items:center;gap:18px;border-bottom:3px solid #1a237e;padding-bottom:12px;margin-bottom:14px}
+    .header img{width:64px;height:64px;object-fit:contain;border-radius:50%}
+    .header-text h1{font-size:16px;font-weight:900;color:#1a237e;text-transform:uppercase;letter-spacing:1px;margin:0}
+    .header-text p{font-size:11px;color:#555;margin:2px 0 0}
+    .doc-title{background:#1a237e;color:#fff;text-align:center;font-size:12px;font-weight:700;letter-spacing:3px;padding:8px 0;margin-bottom:14px;border-radius:3px}
     .sub{color:#666;font-size:12px;margin-bottom:20px}
     table{width:100%;border-collapse:collapse;margin-top:12px}
     thead th{background:#1a237e;color:#fff;padding:9px 12px;text-align:left;font-size:12px}
@@ -885,7 +889,15 @@ function printRevenueBreakdown(){
     @media print{body{padding:16px}.no-print{display:none}}
     *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
   </style></head><body>
-  <h2>APM Mortuary – Revenue Breakdown</h2>
+  <div class="header">
+    <img src="${LOGO_URI}" alt="APM Logo" onerror="this.style.display='none'">
+    <div class="header-text">
+      <h1>Ampah Prah Mortuary</h1>
+      <p>Akim Asuom &nbsp;|&nbsp; P.O. Box 946, Akim Oda &nbsp;|&nbsp; Tel: 0208360777 / 0550420202</p>
+      <p style="font-style:italic;color:#888;margin-top:2px">Rest As You Live</p>
+    </div>
+  </div>
+  <div class="doc-title">REVENUE BREAKDOWN</div>
   <div class="sub">${branch} &nbsp;|&nbsp; Period: <b>${filterLabel}</b></div>
   <div class="summary">
     <div class="s-card"><div class="lbl">Embalming Fee</div><div class="val">GH&#8373;${totalEmb.toFixed(2)}</div></div>
